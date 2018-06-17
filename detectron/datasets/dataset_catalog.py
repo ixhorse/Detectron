@@ -201,7 +201,23 @@ _DATASETS = {
             _DATA_DIR + '/VOC2012/annotations/voc_2012_val.json',
         _DEVKIT_DIR:
             _DATA_DIR + '/VOC2012/VOCdevkit2012'
-    }
+    },
+    'visdrone_train':{
+        _IM_DIR:
+            _DATA_DIR + '/VisDrone2018/VisDrone2018-DET-train/images',
+        _ANN_FN:
+            _DATA_DIR + '/VisDrone2018/VisDrone2018-DET-train/annotations.json'
+    },
+    'visdrone_val':{
+        _IM_DIR:
+            _DATA_DIR + '/VisDrone2018/VisDrone2018-DET-val/images',
+        _ANN_FN:
+            _DATA_DIR + '/VisDrone2018/VisDrone2018-DET-val/annotations.json'
+    },
+    'visdrone_test':{
+        _IM_DIR:
+            _DATA_DIR + '/VisDrone2018/VisDrone2018-DET-challenge/images',
+    },
 }
 
 

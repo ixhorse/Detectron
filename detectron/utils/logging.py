@@ -27,13 +27,17 @@ import logging
 import numpy as np
 import smtplib
 import sys
+import time
+import os
 
 # Print lower precision floating point values than default FLOAT_REPR
 json.encoder.FLOAT_REPR = lambda o: format(o, '.6f')
 
 
 def log_json_stats(stats, sort_keys=True):
+    logger = logging.getLogger(__name__)
     print('json_stats: {:s}'.format(json.dumps(stats, sort_keys=sort_keys)))
+    logger.info('json_stats: {:s}'.format(json.dumps(stats, sort_keys=sort_keys)))
 
 
 class SmoothedValue(object):
@@ -75,7 +79,9 @@ def setup_logging(name):
     FORMAT = '%(levelname)s %(filename)s:%(lineno)4d: %(message)s'
     # Manually clear root loggers to prevent any module that may have called
     # logging.basicConfig() from blocking our logging setup
+    log_file = '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
+    log_path = os.path.join('./output', log_file)
     logging.root.handlers = []
-    logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
+    logging.basicConfig(filename=log_path, level=logging.INFO, format=FORMAT, stream=sys.stdout)
     logger = logging.getLogger(name)
     return logger
