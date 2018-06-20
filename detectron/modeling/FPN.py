@@ -294,6 +294,7 @@ def add_topdown_lateral_module(
         )
     # Top-down 2x upsampling
     td = model.net.UpsampleNearest(fpn_top, fpn_bottom + '_topdown', scale=2)
+    # td = model.BilinearInterpolation(fpn_top, fpn_bottom + '_topdown', dim_top, dim_top, up_scale=2)
     # Sum lateral and top-down
     model.net.Sum([lat, td], fpn_bottom)
 

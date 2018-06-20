@@ -26,8 +26,6 @@ FAST_RCNN:
   ROI_XFORM_METHOD: RoIAlign
   ROI_XFORM_RESOLUTION: 7
   ROI_XFORM_SAMPLING_RATIO: 2
-RPN:
-  RPN_ON: true
 TRAIN:
   WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl
   DATASETS: ('visdrone_train',)
@@ -41,6 +39,5 @@ TEST:
   SCALE: 1200
   MAX_SIZE: 1600
   NMS: 0.5
-  PRECOMPUTED_PROPOSALS: false
 OUTPUT_DIR: ./output
 DOWNLOAD_CACHE: ./output/detectron-download-cache

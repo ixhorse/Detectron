@@ -377,8 +377,8 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             weight_init=('GivenTensorFill', {'values': kernel}),
             bias_init=('ConstantFill', {'value': 0.})
         )
-        self.do_not_update_params.append(self.weights[-1])
-        self.do_not_update_params.append(self.biases[-1])
+        # self.do_not_update_params.append(self.weights[-1])
+        # self.do_not_update_params.append(self.biases[-1])
         return blob
 
     def ConvAffine(  # args in the same order of Conv()
