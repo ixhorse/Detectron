@@ -71,6 +71,7 @@ def add_stage(
     """Add a ResNet stage to the model by stacking n residual blocks."""
     # e.g., prefix = res2
     for i in range(n):
+        deform = True if i == n and i > 2 else False
         blob_in = add_residual_block(
             model,
             '{}_{}'.format(prefix, i),
@@ -82,7 +83,8 @@ def add_stage(
             stride_init,
             # Not using inplace for the last block;
             # it may be fetched externally or used by FPN
-            inplace_sum=i < n - 1
+            inplace_sum=i < n - 1,
+            deform = deform
         )
         dim_in = dim_out
     return blob_in, dim_in
@@ -159,7 +161,8 @@ def add_residual_block(
     dim_inner,
     dilation,
     stride_init=2,
-    inplace_sum=False
+    inplace_sum=False,
+    deform=False
 ):
     """Add a residual block to the model."""
     # prefix = res<stage>_<sub_stage>, e.g., res2_3
@@ -180,7 +183,8 @@ def add_residual_block(
         prefix,
         dim_inner,
         group=cfg.RESNETS.NUM_GROUPS,
-        dilation=dilation
+        dilation=dilation,
+        deform=deform
     )
 
     # sum -> ReLU
@@ -282,7 +286,8 @@ def bottleneck_transformation(
     prefix,
     dim_inner,
     dilation=1,
-    group=1
+    group=1,
+    deform=False
 ):
     """Add a bottleneck transformation to the model."""
     # In original resnet, stride=2 is on 1x1.
@@ -303,18 +308,32 @@ def bottleneck_transformation(
     cur = model.Relu(cur, cur)
 
     # conv 3x3 -> BN -> ReLU
-    cur = model.ConvAffine(
-        cur,
-        prefix + '_branch2b',
-        dim_inner,
-        dim_inner,
-        kernel=3,
-        stride=str3x3,
-        pad=1 * dilation,
-        dilation=dilation,
-        group=group,
-        inplace=True
-    )
+    if(deform):
+        cur = model.DeformConvAffine(
+            cur,
+            prefix + '_branch2b',
+            dim_inner,
+            dim_inner,
+            kernel=3,
+            stride=str3x3,
+            pad=1 * dilation,
+            dilation=dilation,
+            group=group,
+            inplace=True
+        )
+    else:
+        cur = model.ConvAffine(
+            cur,
+            prefix + '_branch2b',
+            dim_inner,
+            dim_inner,
+            kernel=3,
+            stride=str3x3,
+            pad=1 * dilation,
+            dilation=dilation,
+            group=group,
+            inplace=True
+        )
     cur = model.Relu(cur, cur)
 
     # conv 1x1 -> BN (no ReLU)

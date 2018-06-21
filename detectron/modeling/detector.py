@@ -78,6 +78,51 @@ class DetectionModelHelper(cnn.CNNModelHelper):
                  str(p).find('gpu_{}'.format(gpu_id)) == 0)
             )]
 
+    def DeformConvAffine(
+        self, blob_in, prefix, dim_in, dim_out, kernel, stride, pad,
+        group=1, dilation=1,
+        weight_init=None,
+        bias_init=None,
+        suffix='_bn',
+        inplace=False
+    ):
+        """ConAffine add Deformable Conv
+        """
+        offset_blob = self.Conv(
+            blob_in,
+            prefix + '_offset',
+            dim_in,
+            72,
+            kernel,
+            stride=stride,
+            pad=pad,
+            group=group,
+            dilation=dilation,
+            weight_init=initializers.Initializer("ConstantFill", value=0.),
+            bias_init=initializers.Initializer("ConstantFill", value=0.),
+            no_bias=0
+        )
+        
+        w = self.create_param(
+            param_name=prefix + '_w',
+            # initializer=initializers.Initializer("ConstantFill", value=0.),
+            tags=ParameterTags.WEIGHT,
+            shape=[dim_out, dim_in, kernel, kernel],
+        )
+        deform_blob = self.net.DeformConv(
+            [blob_in, offset_blob, w],
+            [prefix],
+            stride=stride,
+            pad=pad,
+            kernel=kernel,
+            order='NCHW',
+            deformable_group=group,
+        )
+        blob_out = self.AffineChannel(
+            deform_blob, prefix + suffix, dim=dim_out, inplace=inplace
+        )
+        return blob_out
+
     def AffineChannel(self, blob_in, blob_out, dim, inplace=False):
         """Affine transformation to replace BN in networks where BN cannot be
         used (e.g., because the minibatch size is too small).
