@@ -84,7 +84,7 @@ def add_stage(
             # Not using inplace for the last block;
             # it may be fetched externally or used by FPN
             inplace_sum=i < n - 1,
-            deform = deform
+            deform = False
         )
         dim_in = dim_out
     return blob_in, dim_in

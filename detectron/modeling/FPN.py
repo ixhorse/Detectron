@@ -213,6 +213,18 @@ def add_fpn(model, fpn_level_info):
                 weight_init=xavier_fill,
                 bias_init=const_fill(0.0)
             )
+        prefix = 'fpn_{}'.format(fpn_level_info.blobs[i])
+        squeeze = model.AveragePool(fpn_blob, prefix+'_squeeze', global_pooling=True)
+        squeeze = model.Flatten(squeeze, prefix+'_flatten')
+        excitation = model.FC(squeeze, prefix+'_excitation1', fpn_dim, int(fpn_dim/16), \
+                                weight_init=xavier_fill, bias_init=const_fill(0.0))
+        
+        excitation = model.Relu(excitation, prefix+'_relu')
+        excitation = model.FC(excitation, prefix+'_excitation2', int(fpn_dim/16), fpn_dim,
+                                weight_init=xavier_fill, bias_init=const_fill(0.0))
+        excitation = model.Sigmoid(excitation, prefix+'_sigmoid')
+        excitation = model.ExpandDims(excitation, prefix+'_expand', dims=[2,3])
+        fpn_blob = model.Mul([fpn_blob, excitation], prefix+'_scale', broadcast=1)
         blobs_fpn += [fpn_blob]
         spatial_scales += [fpn_level_info.spatial_scales[i]]
 
