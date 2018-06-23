@@ -9,7 +9,7 @@ SOLVER:
   LR_POLICY: steps_with_decay
   BASE_LR: 0.0025
   GAMMA: 0.1
-  MAX_ITER: 100000
+  MAX_ITER: 80000
   STEPS: [0, 60000, 80000]
 FPN:
   FPN_ON: True

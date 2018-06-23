@@ -66,12 +66,16 @@ def add_stage(
     dim_out,
     dim_inner,
     dilation,
-    stride_init=2
+    stride_init=2,
+    deformable=False
 ):
     """Add a ResNet stage to the model by stacking n residual blocks."""
     # e.g., prefix = res2
     for i in range(n):
-        deform = True if i == n and i > 2 else False
+        if(deformable):
+            deform = True if i == n-1 else False
+        else:
+            deform = False
         blob_in = add_residual_block(
             model,
             '{}_{}'.format(prefix, i),
@@ -84,7 +88,7 @@ def add_stage(
             # Not using inplace for the last block;
             # it may be fetched externally or used by FPN
             inplace_sum=i < n - 1,
-            deform = False
+            deform = deform
         )
         dim_in = dim_out
     return blob_in, dim_in
@@ -102,16 +106,16 @@ def add_ResNet_convX_body(model, block_counts):
 
     dim_bottleneck = cfg.RESNETS.NUM_GROUPS * cfg.RESNETS.WIDTH_PER_GROUP
     (n1, n2, n3) = block_counts[:3]
-    s, dim_in = add_stage(model, 'res2', p, n1, dim_in, 256, dim_bottleneck, 1)
+    s, dim_in = add_stage(model, 'res2', p, n1, dim_in, 256, dim_bottleneck, 1, deformable=False)
     if freeze_at == 2:
         model.StopGradient(s, s)
     s, dim_in = add_stage(
-        model, 'res3', s, n2, dim_in, 512, dim_bottleneck * 2, 1
+        model, 'res3', s, n2, dim_in, 512, dim_bottleneck * 2, 1, deformable=True
     )
     if freeze_at == 3:
         model.StopGradient(s, s)
     s, dim_in = add_stage(
-        model, 'res4', s, n3, dim_in, 1024, dim_bottleneck * 4, 1
+        model, 'res4', s, n3, dim_in, 1024, dim_bottleneck * 4, 1, deformable=True
     )
     if freeze_at == 4:
         model.StopGradient(s, s)
@@ -119,7 +123,7 @@ def add_ResNet_convX_body(model, block_counts):
         n4 = block_counts[3]
         s, dim_in = add_stage(
             model, 'res5', s, n4, dim_in, 2048, dim_bottleneck * 8,
-            cfg.RESNETS.RES5_DILATION
+            cfg.RESNETS.RES5_DILATION, deformable=True
         )
         if freeze_at == 5:
             model.StopGradient(s, s)

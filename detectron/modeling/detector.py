@@ -98,14 +98,14 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             pad=pad,
             group=group,
             dilation=dilation,
-            weight_init=initializers.Initializer("ConstantFill", value=0.),
-            bias_init=initializers.Initializer("ConstantFill", value=0.),
+            weight_init=("ConstantFill", {'value':0.0}),
+            bias_init=("ConstantFill", {'value':0.0}),
             no_bias=0
         )
         
         w = self.create_param(
             param_name=prefix + '_w',
-            # initializer=initializers.Initializer("ConstantFill", value=0.),
+            initializer=initializers.Initializer("XavierFill"),
             tags=ParameterTags.WEIGHT,
             shape=[dim_out, dim_in, kernel, kernel],
         )
@@ -116,7 +116,8 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             pad=pad,
             kernel=kernel,
             order='NCHW',
-            deformable_group=group,
+            deformable_group=4,
+            group=group
         )
         blob_out = self.AffineChannel(
             deform_blob, prefix + suffix, dim=dim_out, inplace=inplace
