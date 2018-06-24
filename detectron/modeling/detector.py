@@ -96,7 +96,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             kernel,
             stride=stride,
             pad=pad,
-            group=group,
+            group=1,
             dilation=dilation,
             weight_init=("ConstantFill", {'value':0.0}),
             bias_init=("ConstantFill", {'value':0.0}),
@@ -104,10 +104,10 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         )
         
         w = self.create_param(
-            param_name=prefix + '_w',
+            param_name=prefix + '_b',
             initializer=initializers.Initializer("XavierFill"),
             tags=ParameterTags.WEIGHT,
-            shape=[dim_out, dim_in, kernel, kernel],
+            shape=[dim_in, int(dim_out/1), kernel, kernel],
         )
         deform_blob = self.net.DeformConv(
             [blob_in, offset_blob, w],
@@ -117,7 +117,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             kernel=kernel,
             order='NCHW',
             deformable_group=4,
-            group=group
+            group=1
         )
         blob_out = self.AffineChannel(
             deform_blob, prefix + suffix, dim=dim_out, inplace=inplace
@@ -423,8 +423,8 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             weight_init=('GivenTensorFill', {'values': kernel}),
             bias_init=('ConstantFill', {'value': 0.})
         )
-        # self.do_not_update_params.append(self.weights[-1])
-        # self.do_not_update_params.append(self.biases[-1])
+        self.do_not_update_params.append(self.weights[-1])
+        self.do_not_update_params.append(self.biases[-1])
         return blob
 
     def ConvAffine(  # args in the same order of Conv()

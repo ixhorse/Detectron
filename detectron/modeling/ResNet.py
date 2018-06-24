@@ -45,7 +45,7 @@ def add_ResNet101_conv4_body(model):
 
 
 def add_ResNet101_conv5_body(model):
-    return add_ResNet_convX_body(model, (3, 4, 23, 3))
+    return add_ResNet_convX_body(model, (3, 4, 23))
 
 
 def add_ResNet152_conv5_body(model):

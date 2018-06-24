@@ -213,18 +213,18 @@ def add_fpn(model, fpn_level_info):
                 weight_init=xavier_fill,
                 bias_init=const_fill(0.0)
             )
-        # prefix = 'fpn_{}'.format(fpn_level_info.blobs[i])
-        # squeeze = model.AveragePool(fpn_blob, prefix+'_squeeze', global_pooling=True)
-        # squeeze = model.Flatten(squeeze, prefix+'_flatten')
-        # excitation = model.FC(squeeze, prefix+'_excitation1', fpn_dim, int(fpn_dim/16), \
-        #                         weight_init=xavier_fill, bias_init=const_fill(0.0))
+        prefix = 'fpn_{}'.format(fpn_level_info.blobs[i])
+        squeeze = model.AveragePool(fpn_blob, prefix+'_squeeze', global_pooling=True)
+        squeeze = model.Flatten(squeeze, prefix+'_flatten')
+        excitation = model.FC(squeeze, prefix+'_excitation1', fpn_dim, int(fpn_dim/16), \
+                                weight_init=xavier_fill, bias_init=const_fill(0.0))
         
-        # excitation = model.Relu(excitation, prefix+'_relu')
-        # excitation = model.FC(excitation, prefix+'_excitation2', int(fpn_dim/16), fpn_dim,
-        #                         weight_init=xavier_fill, bias_init=const_fill(0.0))
-        # excitation = model.Sigmoid(excitation, prefix+'_sigmoid')
-        # excitation = model.ExpandDims(excitation, prefix+'_expand', dims=[2,3])
-        # fpn_blob = model.Mul([fpn_blob, excitation], prefix+'_scale', broadcast=1)
+        excitation = model.Relu(excitation, prefix+'_relu')
+        excitation = model.FC(excitation, prefix+'_excitation2', int(fpn_dim/16), fpn_dim,
+                                weight_init=xavier_fill, bias_init=const_fill(0.0))
+        excitation = model.Sigmoid(excitation, prefix+'_sigmoid')
+        excitation = model.ExpandDims(excitation, prefix+'_expand', dims=[2,3])
+        fpn_blob = model.Mul([fpn_blob, excitation], prefix+'_scale', broadcast=1)
         blobs_fpn += [fpn_blob]
         spatial_scales += [fpn_level_info.spatial_scales[i]]
 
@@ -567,9 +567,9 @@ def fpn_level_info_ResNet50_conv5():
 
 def fpn_level_info_ResNet101_conv5():
     return FpnLevelInfo(
-        blobs=('res5_2_sum', 'res4_22_sum', 'res3_3_sum', 'res2_2_sum'),
-        dims=(2048, 1024, 512, 256),
-        spatial_scales=(1. / 32., 1. / 16., 1. / 8., 1. / 4.)
+        blobs=('res4_22_sum', 'res3_3_sum', 'res2_2_sum'),
+        dims=(1024, 512, 256),
+        spatial_scales=(1. / 16., 1. / 8., 1. / 4.)
     )
 
 
